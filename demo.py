@@ -1,89 +1,102 @@
 import sys
-import os
-import time
+from typing import List
+
 
 class Demo:
+    """
+    Lightweight demo class that simulates a tiny build pipeline.
+    Everything runs in milliseconds but still behaves like real steps.
+    """
 
-    # 1. Real “app”
-    def hello(self, name="Devfile"):
-        print(f"Hello {name}, from Python Devfile playground!!!")
+    def hello(self, name: str = "Devfile") -> None:
+        greeting = f"Hello {name}"
+        print(greeting)
 
-    # 2. Real “build” (simulate compilation)
-    def build(self):
-        print("Building project...")
-        with open("build.log", "w") as f:
-            f.write("Build successful\n")
-        print("build.log generated")
+    def build(self) -> None:
+        """
+        Simulate a build by producing a deterministic artifact value.
+        """
+        sources = ["core", "utils", "api"]
+        artifact = "-".join(sources).upper()
+        print(f"Build artifact: {artifact}")
 
-    # 3. Real “test” (checks build output)
-    def test(self):
-        print("Running tests...")
-        if not os.path.exists("build.log"):
-            print("Tests failed: build.log not found")
+    def test(self) -> None:
+        """
+        Simulate tests by validating a known invariant.
+        """
+        expected = 6
+        actual = sum([1, 2, 3])
+        if actual != expected:
+            print("Tests failed")
             sys.exit(1)
-        print("All tests passed")
+        print("Tests passed")
 
-    # 4. Real “lint” (simple code quality check)
-    def lint(self):
-        print("Linting code...")
-        with open(__file__, "r") as f:
-            lines = f.readlines()
-        long_lines = [i+1 for i, l in enumerate(lines) if len(l) > 120]
-        if long_lines:
-            print(f"Lint warning: long lines at {long_lines}")
-        else:
-            print("Lint passed")
+    def lint(self) -> None:
+        """
+        Simulate linting by checking naming conventions.
+        """
+        names = ["build", "test", "lint", "hello"]
+        invalid = [n for n in names if not n.islower()]
+        if invalid:
+            print(f"Lint failed: {invalid}")
+            sys.exit(1)
+        print("Lint clean")
 
-    # 5. Used for multiline "\" demo
-    def multiline(self):
-        print("Multiline execution succeeded")
+    def multiline(self) -> None:
+        """
+        Entry point for testing shell line continuation.
+        """
+        print("Multiline execution OK")
 
-    # 6. Used for semicolon demo
-    def semicolon(self):
-        ts = time.strftime("%H:%M:%S")
-        print(f"Semicolon step executed at {ts}")
+    def semicolon(self) -> None:
+        """
+        Small step useful for semicolon chaining.
+        """
+        print("Semicolon step OK")
 
-    # 7. Used for pipe demo
-    def pipe(self):
-        # Output is meaningful for grep/wc
-        print("python devfile demo example")
+    def pipe(self) -> None:
+        """
+        Output structured text so pipes can do real filtering.
+        """
+        records = [
+            "service=python status=ok",
+            "service=node status=ok",
+            "service=python status=warn",
+        ]
+        for r in records:
+            print(r)
 
-    # 8. Used for OR operator demo
-    def or_fail(self):
-        print("Intentional failure triggered")
+    def or_fail(self) -> None:
+        """
+        Fail deterministically for || demo.
+        """
+        print("Simulated failure")
         sys.exit(1)
 
-    # 9. Windows backslash demo
-    def windows_backslash(self):
-        print("Windows-style \\\\ backslash normalization worked")
+    def windows_backslash(self) -> None:
+        """
+        Target for Windows-style \\ normalization demo.
+        """
+        print("Windows backslash normalization OK")
 
-    # 10. Small file generation (useful for chaining)
-    def generate_file(self):
-        with open("demo.txt", "w") as f:
-            f.write("Devfile demo file\n")
-        print("demo.txt created")
 
-    # 11. Read file (useful for pipelines)
-    def read_file(self):
-        if not os.path.exists("demo.txt"):
-            print("demo.txt not found")
-            sys.exit(1)
-        with open("demo.txt") as f:
-            print(f.read().strip())
+def main(argv: List[str]) -> None:
+    demo = Demo()
+
+    if len(argv) < 2:
+        print("Usage: python demo.py <action> [args]")
+        sys.exit(1)
+
+    action = argv[1]
+    args = argv[2:]
+
+    if not hasattr(demo, action):
+        print(f"Unknown action: {action}")
+        sys.exit(1)
+
+    method = getattr(demo, action)
+    method(*args)
 
 
 if __name__ == "__main__":
-    demo = Demo()
-
-    if len(sys.argv) < 2:
-        print("Usage: python demo.py <method> [args]")
-        sys.exit(1)
-
-    method = sys.argv[1]
-    args = sys.argv[2:]
-
-    if not hasattr(demo, method):
-        print(f"Unknown method: {method}")
-        sys.exit(1)
-
-    getattr(demo, method)(*args)
+    main(sys.argv)

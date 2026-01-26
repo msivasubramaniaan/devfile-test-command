@@ -13,90 +13,96 @@ components:
       mountSources: true
 
 commands:
-
-  # Build → Test → App (real flow)
+  # Build → Test → App
   - id: build-test-run
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py build
-        python demo.py test
-        python demo.py hello Devfile
+        python -u demo.py build
+        python -u demo.py test
+        python -u demo.py hello Devfile
 
   # Explicit &&
   - id: build-and-test
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py build && python demo.py test
+        python -u demo.py build && python -u demo.py test
 
   # Lint + Test
   - id: lint-and-test
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py lint
-        python demo.py test
+        python -u demo.py lint
+        python -u demo.py test
 
-  # Multiline shell
+  # Multiline shell ( \ continuation )
   - id: run-python-multiline
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python \
+        python -u \
           demo.py \
           multiline
 
   # Semicolon chaining
   - id: semicolon-demo
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py semicolon;
-        python demo.py semicolon;
-        python demo.py semicolon
+        python -u demo.py semicolon;
+        python -u demo.py semicolon;
+        python -u demo.py semicolon
 
   # Pipe example
   - id: pipe-demo
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py pipe | grep python | wc -w
+        python -u demo.py pipe | grep "service=python" | wc -l
 
-  # OR operator
+  # OR operator (||)
   - id: or-operator-demo
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py or_fail || echo "Recovered from failure"
+        python -u demo.py or_fail || echo "Recovered from failure"
 
-  # Windows backslash normalization
+  # Windows backslash normalization (\\)
   - id: windows-backslash-demo
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python \\
+        python -u \\
           demo.py \\
           windows_backslash
 
-  # File generation + pipe + read
-  - id: file-flow-demo
+  # Single line normal run
+  - id: run-app
     exec:
-      component: python-runtime
+      component: python
       commandLine: |
-        python demo.py generate_file
-        python demo.py read_file
+        python -u demo.py hello
 
-  # Composite sequential
+  # Mixed shell syntax
+  - id: mixed-shell-syntax
+    exec:
+      component: python
+      commandLine: |
+        python -u demo.py pipe | grep "service=python";
+        echo "done"
+
+  # Composite sequential workflow
   - id: full-workflow
     composite:
       commands:
         - build-test-run
         - run-python-multiline
-        - file-flow-demo
+        - run-app
       parallel: false
 
-  # Composite parallel
+  # Composite parallel workflow
   - id: diagnostics-parallel
     composite:
       commands:
