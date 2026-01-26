@@ -110,3 +110,66 @@ commands:
         - or-operator-demo
         - semicolon-demo
       parallel: true
+
+  # Subshell grouping
+  - id: subshell-demo
+    exec:
+      component: python
+      commandLine: |
+        (python -u demo.py build && python -u demo.py test) && python -u demo.py hello Devfile
+
+  # Conditional execution (if / then / else)
+  - id: conditional-demo
+    exec:
+      component: python
+      commandLine: |
+        if python -u demo.py test; then echo "Test succeeded"; else echo "Test failed"; fi
+
+  # Command substitution $(...)
+  - id: command-substitution-demo
+    exec:
+      component: python
+      commandLine: |
+        echo "Python version: $(python --version)"
+
+  # Inline environment variable
+  - id: inline-env-demo
+    exec:
+      component: python
+      commandLine: |
+        MODE=dev python -u demo.py hello
+
+  # Background execution with wait
+  - id: background-demo
+    exec:
+      component: python
+      commandLine: |
+        python -u demo.py pipe & python -u demo.py pipe & wait
+
+  # Output redirection
+  - id: redirection-demo
+    exec:
+      component: python
+      commandLine: |
+        python -u demo.py pipe > out.txt && cat out.txt
+
+  # Append redirection
+  - id: append-redirection-demo
+    exec:
+      component: python
+      commandLine: |
+        python -u demo.py pipe >> out.txt && cat out.txt
+
+  # Here-string (bash specific)
+  - id: here-string-demo
+    exec:
+      component: python
+      commandLine: |
+        grep python <<< "python devfile demo example"
+
+  # Mixed advanced syntax
+  - id: mixed-advanced-syntax
+    exec:
+      component: python
+      commandLine: |
+        (MODE=test python -u demo.py pipe | grep python > result.txt) && echo "Saved to result.txt"
