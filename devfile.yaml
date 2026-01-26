@@ -1,0 +1,132 @@
+schemaVersion: 2.2.0
+metadata:
+  name: devfile-tsx-demo
+
+components:
+  - name: nodejs
+    container:
+      image: node:20
+      command:
+        - sleep
+      args:
+        - infinity
+      mountSources: true
+
+commands:
+  # 1. Simple multiline → auto &&
+  - id: build-test-dev
+    exec:
+      component: nodejs
+      commandLine: |
+        npm run build
+        npm run test
+        npm run dev
+
+  # 2. Explicit && chaining
+  - id: build-and-test
+    exec:
+      component: nodejs
+      commandLine: |
+        npm run build && npm run test
+
+  # 3. Another simple chain
+  - id: lint-and-test
+    exec:
+      component: nodejs
+      commandLine: |
+        npm run lint
+        npm run test
+
+  # 4. Shell line continuation using \
+  - id: run-tsx-multiline
+    exec:
+      component: nodejs
+      commandLine: |
+        tsx \
+          src/app.tsx \
+          "Muthu"
+
+  # 5. Semicolon chaining
+  - id: semicolon-demo
+    exec:
+      component: nodejs
+      commandLine: |
+        echo Start;
+        echo Middle;
+        echo End
+
+  # 6. Pipe demo
+  - id: pipe-demo
+    exec:
+      component: nodejs
+      commandLine: |
+        echo "node tsx devfile demo" | grep tsx | wc -w
+
+  # 7. OR operator demo
+  - id: or-operator-demo
+    exec:
+      component: nodejs
+      commandLine: |
+        npm run fail || echo "Recovered from failure"
+
+  # 8. Single line command
+  - id: run-dev
+    exec:
+      component: nodejs
+      commandLine: npm run dev
+
+  # 9. Windows-style backslash normalization
+  - id: windows-backslash-demo
+    exec:
+      component: nodejs
+      commandLine: |
+        echo \\
+          "windows" \\
+          "style"
+
+  # 10. Mixed shell syntax
+  - id: mixed-shell-syntax
+    exec:
+      component: nodejs
+      commandLine: |
+        echo "hello" | grep h;
+        echo "done"
+
+  # 11. Inline && with extra commands
+  - id: complex-inline-chain
+    exec:
+      component: nodejs
+      commandLine: |
+        npm run build && npm run lint && npm run test
+
+  # 12. Simple echo command (baseline)
+  - id: simple-echo
+    exec:
+      component: nodejs
+      commandLine: echo "Simple command execution"
+
+  # 13. Composite: sequential workflow
+  - id: full-workflow
+    composite:
+      commands:
+        - build-test-dev
+        - run-tsx-multiline
+        - simple-echo
+      parallel: false
+
+  # 14. Composite: parallel execution
+  - id: diagnostics-parallel
+    composite:
+      commands:
+        - pipe-demo
+        - or-operator-demo
+        - semicolon-demo
+      parallel: true
+
+  # 15. Composite: nested composite
+  - id: complete-demo
+    composite:
+      commands:
+        - full-workflow
+        - diagnostics-parallel
+        - run-dev
