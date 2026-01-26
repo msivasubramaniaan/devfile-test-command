@@ -1,13 +1,15 @@
-# Devfile TSX Command Demo
+# Devfile Python Hello World
 
-This repository is a small, clean playground to demonstrate **all practical command patterns supported by Devfile (`devfile.yaml`)** using a simple TypeScript/TSX application.
+A simple Python application used to demonstrate Devfile command execution.
 
-It is designed to test and showcase:
+This repository is designed to showcase all practical patterns supported by
+`devfile.yaml` commands, including:
 
-- How multiline commands are handled
-- How logical commands are auto-chained with `&&`
-- How shell syntax is preserved
-- How composite commands work (sequential, parallel, nested)
+- Logical command chaining (`&&`)
+- Shell-style multiline commands
+- Pipes (`|`), semicolons (`;`), and OR operators (`||`)
+- Windows-style backslash normalization (`\\`)
+- Composite commands (sequential, parallel, nested)
 
 ---
 

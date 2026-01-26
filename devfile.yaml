@@ -1,120 +1,105 @@
 schemaVersion: 2.2.0
 metadata:
-  name: devfile-tsx-demo
+  name: devfile-python-hello-world
 
 components:
-  - name: nodejs
+  - name: python
     container:
-      image: node:20
+      image: python:3.11
       command:
         - sleep
       args:
-        - infinity
+        - "infinity"
       mountSources: true
 
 commands:
   # 1. Simple multiline → auto &&
-  - id: build-test-dev
+  - id: build-test-run
     exec:
-      component: nodejs
+      component: python
       commandLine: |
-        npm run build
-        npm run test
-        npm run dev
+        echo "Building project..."
+        echo "Running tests..."
+        python app.py Devfile
 
   # 2. Explicit && chaining
   - id: build-and-test
     exec:
-      component: nodejs
+      component: python
       commandLine: |
-        npm run build && npm run test
+        echo "Building..." && echo "Testing..."
 
-  # 3. Another simple chain
-  - id: lint-and-test
+  # 3. Shell line continuation (\)
+  - id: run-python-multiline
     exec:
-      component: nodejs
+      component: python
       commandLine: |
-        npm run lint
-        npm run test
-
-  # 4. Shell line continuation using \
-  - id: run-tsx-multiline
-    exec:
-      component: nodejs
-      commandLine: |
-        tsx \
-          src/app.tsx \
+        python \
+          app.py \
           "Muthu"
 
-  # 5. Semicolon chaining
+  # 4. Semicolon chaining
   - id: semicolon-demo
     exec:
-      component: nodejs
+      component: python
       commandLine: |
         echo Start;
         echo Middle;
         echo End
 
-  # 6. Pipe demo
+  # 5. Pipe operator
   - id: pipe-demo
     exec:
-      component: nodejs
+      component: python
       commandLine: |
-        echo "node tsx devfile demo" | grep tsx | wc -w
+        echo "python devfile demo" | grep python | wc -w
 
-  # 7. OR operator demo
+  # 6. OR operator
   - id: or-operator-demo
     exec:
-      component: nodejs
+      component: python
       commandLine: |
-        npm run fail || echo "Recovered from failure"
+        false || echo "Recovered from failure"
 
-  # 8. Single line command
-  - id: run-dev
+  # 7. Single line command
+  - id: run-app
     exec:
-      component: nodejs
-      commandLine: npm run dev
+      component: python
+      commandLine: python app.py
 
-  # 9. Windows-style backslash normalization
+  # 8. Windows-style backslash normalization
   - id: windows-backslash-demo
     exec:
-      component: nodejs
+      component: python
       commandLine: |
         echo \\
           "windows" \\
           "style"
 
-  # 10. Mixed shell syntax
+  # 9. Mixed shell syntax
   - id: mixed-shell-syntax
     exec:
-      component: nodejs
+      component: python
       commandLine: |
         echo "hello" | grep h;
         echo "done"
 
-  # 11. Inline && with extra commands
-  - id: complex-inline-chain
-    exec:
-      component: nodejs
-      commandLine: |
-        npm run build && npm run lint && npm run test
-
-  # 12. Simple echo command (baseline)
+  # 10. Simple echo (baseline)
   - id: simple-echo
     exec:
-      component: nodejs
+      component: python
       commandLine: echo "Simple command execution"
 
-  # 13. Composite: sequential workflow
+  # 11. Composite: sequential workflow
   - id: full-workflow
     composite:
       commands:
-        - build-test-dev
-        - run-tsx-multiline
+        - build-test-run
+        - run-python-multiline
         - simple-echo
       parallel: false
 
-  # 14. Composite: parallel execution
+  # 12. Composite: parallel execution
   - id: diagnostics-parallel
     composite:
       commands:
@@ -123,10 +108,10 @@ commands:
         - semicolon-demo
       parallel: true
 
-  # 15. Composite: nested composite
+  # 13. Composite: nested composite
   - id: complete-demo
     composite:
       commands:
         - full-workflow
         - diagnostics-parallel
-        - run-dev
+        - run-app
