@@ -13,93 +13,90 @@ components:
       mountSources: true
 
 commands:
-  # 1. Simple multiline → auto &&
+
+  # Build → Test → App (real flow)
   - id: build-test-run
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo "Building project..."
-        echo "Running tests..."
-        python app.py Devfile
+        python demo.py build
+        python demo.py test
+        python demo.py hello Devfile
 
-  # 2. Explicit && chaining
+  # Explicit &&
   - id: build-and-test
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo "Building..." && echo "Testing..."
+        python demo.py build && python demo.py test
 
-  # 3. Shell line continuation (\)
+  # Lint + Test
+  - id: lint-and-test
+    exec:
+      component: python-runtime
+      commandLine: |
+        python demo.py lint
+        python demo.py test
+
+  # Multiline shell
   - id: run-python-multiline
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
         python \
-          app.py \
-          "Muthu"
+          demo.py \
+          multiline
 
-  # 4. Semicolon chaining
+  # Semicolon chaining
   - id: semicolon-demo
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo Start;
-        echo Middle;
-        echo End
+        python demo.py semicolon;
+        python demo.py semicolon;
+        python demo.py semicolon
 
-  # 5. Pipe operator
+  # Pipe example
   - id: pipe-demo
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo "python devfile demo" | grep python | wc -w
+        python demo.py pipe | grep python | wc -w
 
-  # 6. OR operator
+  # OR operator
   - id: or-operator-demo
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        false || echo "Recovered from failure"
+        python demo.py or_fail || echo "Recovered from failure"
 
-  # 7. Single line command
-  - id: run-app
-    exec:
-      component: python
-      commandLine: python app.py
-
-  # 8. Windows-style backslash normalization
+  # Windows backslash normalization
   - id: windows-backslash-demo
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo \\
-          "windows" \\
-          "style"
+        python \\
+          demo.py \\
+          windows_backslash
 
-  # 9. Mixed shell syntax
-  - id: mixed-shell-syntax
+  # File generation + pipe + read
+  - id: file-flow-demo
     exec:
-      component: python
+      component: python-runtime
       commandLine: |
-        echo "hello" | grep h;
-        echo "done"
+        python demo.py generate_file
+        python demo.py read_file
 
-  # 10. Simple echo (baseline)
-  - id: simple-echo
-    exec:
-      component: python
-      commandLine: echo "Simple command execution"
-
-  # 11. Composite: sequential workflow
+  # Composite sequential
   - id: full-workflow
     composite:
       commands:
         - build-test-run
         - run-python-multiline
-        - simple-echo
+        - file-flow-demo
       parallel: false
 
-  # 12. Composite: parallel execution
+  # Composite parallel
   - id: diagnostics-parallel
     composite:
       commands:
@@ -107,11 +104,3 @@ commands:
         - or-operator-demo
         - semicolon-demo
       parallel: true
-
-  # 13. Composite: nested composite
-  - id: complete-demo
-    composite:
-      commands:
-        - full-workflow
-        - diagnostics-parallel
-        - run-app
