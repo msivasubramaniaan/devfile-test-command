@@ -11,6 +11,11 @@ components:
       args:
         - "infinity"
       mountSources: true
+  
+  # Kubernetes component (this is where k8s content lives)
+  - name: demo-k8s-config
+    kubernetes:
+      uri: k8s/demo-configmap.yaml
 
 commands:
   # ------------------------------------------------------------------
@@ -161,6 +166,78 @@ commands:
         echo "hello world" &&
 
   # ------------------------------------------------------------------
+  # 12. Cyclic composite (must be rejected)
+  # ------------------------------------------------------------------
+
+  - id: cycle-a
+    composite:
+      commands:
+        - cycle-b
+
+  - id: cycle-b
+    composite:
+      commands:
+        - cycle-a
+
+  # ------------------------------------------------------------------
+  # 13. Command Groups (build / run / test / debug)
+  # ------------------------------------------------------------------
+
+  - id: build-demo
+    exec:
+      component: python
+      commandLine: python -u demo.py generate
+      group:
+        kind: build
+        isDefault: true
+      label: Build → Generate data
+
+  - id: test-demo
+    exec:
+      component: python
+      commandLine: python -u demo.py validate
+      group:
+        kind: test
+      label: Test → Validate data
+
+  - id: run-demo
+    exec:
+      component: python
+      commandLine: python -u demo.py status
+      group:
+        kind: run
+      label: Run → Show status
+
+  - id: debug-demo
+    exec:
+      component: python
+      commandLine: python -u demo.py argv debug
+      group:
+        kind: debug
+      label: Debug → Show argv flow
+
+  # ------------------------------------------------------------------
+  # 14. workingDir demo
+  # ------------------------------------------------------------------
+
+  - id: workingdir-demo
+    exec:
+      component: python
+      workingDir: /projects
+      commandLine: pwd
+      label: Execute from custom workingDir
+
+  # ------------------------------------------------------------------
+  # 15. Apply command (Kubernetes resource)
+  # Requires k8s/demo-configmap.yaml
+  # ------------------------------------------------------------------
+
+  - id: apply-k8s-resource
+    apply:
+      component: demo-k8s-configs
+      label: Apply Kubernetes ConfigMap
+
+  # ------------------------------------------------------------------
   # Set composite mode commands
   # ------------------------------------------------------------------
 
@@ -180,7 +257,6 @@ commands:
         echo "Parallel" > .composite_mode
         echo "Mode written: Parallel"
 
-
   # ------------------------------------------------------------------
   # Print composite execution start banner
   # ------------------------------------------------------------------
@@ -195,43 +271,30 @@ commands:
         echo "======================================"
 
   # ------------------------------------------------------------------
-  # 12. Composite: sequential workflow
+  # 16. Composite: sequential workflow
   # ------------------------------------------------------------------
   - id: sequential-demo
     composite:
       commands:
         - set-sequential
         - composite-start
-        - generate-validate-transform
-        - pipe-demo
-        - or-demo
-        - posix-multiline-demo
-        - windows-multiline-demo
+        - build-demo
+        - test-demo
+        - run-demo
+        - apply-k8s-resource
       parallel: false
 
   # ------------------------------------------------------------------
-  # 13. Composite: parallel diagnostics
+  # 17. Composite: parallel diagnostics
   # ------------------------------------------------------------------
   - id: parallel-demo
     composite:
       commands:
         - set-parallel
         - composite-start
-        - pipe-demo
-        - semicolon-demo
-        - windows-backslash-demo
+        - build-demo
+        - test-demo
+        - run-demo
+        - debug-demo
+        - apply-k8s-resource
       parallel: true
-
-  # ------------------------------------------------------------------
-  # 14. Cyclic composite (must be rejected)
-  # ------------------------------------------------------------------
-
-  - id: cycle-a
-    composite:
-      commands:
-        - cycle-b
-
-  - id: cycle-b
-    composite:
-      commands:
-        - cycle-a
