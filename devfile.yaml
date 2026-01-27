@@ -22,6 +22,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py generate
         python -u demo.py validate
@@ -32,6 +33,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py generate && python -u demo.py validate
 
@@ -40,6 +42,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py status
 
@@ -50,6 +53,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py fail || echo "Recovered from failure"
 
@@ -60,6 +64,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py status;
         python -u demo.py status
@@ -71,6 +76,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py pipe | grep "service=python" | wc -l
 
@@ -81,6 +87,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u \
           demo.py \
@@ -96,6 +103,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u \\
           demo.py \\
@@ -110,6 +118,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u \\
           demo.py \\
@@ -122,6 +131,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         (python -u demo.py generate && python -u demo.py validate) &&
         python -u demo.py transform
@@ -133,6 +143,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py pipe &
         python -u demo.py pipe &
@@ -145,6 +156,7 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         python -u demo.py generate
         python -u demo.py validate
@@ -157,8 +169,21 @@ commands:
     exec:
       component: python
       commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
         set -x;
         echo "hello world" &&
+
+  # ------------------------------------------------------------------
+  # Print composite execution start banner
+  # ------------------------------------------------------------------
+  - id: composite-start
+    exec:
+      component: python
+      commandLine: |
+        exec > >(tee -a devfile-execution.log) 2>&1
+        echo "======================================"
+        echo "Composite execution started: $(date)"
+        echo "======================================"
 
   # ------------------------------------------------------------------
   # 12. Composite: sequential workflow
@@ -166,6 +191,7 @@ commands:
   - id: full-demo
     composite:
       commands:
+        - composite-start
         - generate-validate-transform
         - pipe-demo
         - or-demo
@@ -179,6 +205,7 @@ commands:
   - id: diagnostics-parallel
     composite:
       commands:
+        - composite-start
         - pipe-demo
         - semicolon-demo
         - windows-backslash-demo
