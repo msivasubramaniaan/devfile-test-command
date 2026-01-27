@@ -161,19 +161,37 @@ commands:
         echo "hello world" &&
 
   # ------------------------------------------------------------------
+  # Set composite mode commands
+  # ------------------------------------------------------------------
+
+  # Set mode = sequential
+  - id: set-sequential
+    exec:
+      component: python
+      commandLine: |
+        echo "Sequential" > .composite_mode
+        echo "Mode written: Sequential"
+
+  # Set mode = parallel
+  - id: set-parallel
+    exec:
+      component: python
+      commandLine: |
+        echo "Parallel" > .composite_mode
+        echo "Mode written: Parallel"
+
+
+  # ------------------------------------------------------------------
   # Print composite execution start banner
   # ------------------------------------------------------------------
   - id: composite-start
     exec:
       component: python
-      env:
-        - name: COMPOSITE_MODE
-          value: unknown
       commandLine: |
+        MODE=$(cat .composite_mode 2>/dev/null || echo "unknown")
         echo "======================================"
         echo "Composite execution started"
-        echo "Mode      : ${COMPOSITE_MODE}"
-        echo "Timestamp : $(date)"
+        echo "Mode      : ${MODE}"
         echo "======================================"
 
   # ------------------------------------------------------------------
@@ -182,6 +200,7 @@ commands:
   - id: sequential-demo
     composite:
       commands:
+        - set-sequential
         - composite-start
         - generate-validate-transform
         - pipe-demo
@@ -196,6 +215,7 @@ commands:
   - id: parallel-demo
     composite:
       commands:
+        - set-parallel
         - composite-start
         - pipe-demo
         - semicolon-demo
