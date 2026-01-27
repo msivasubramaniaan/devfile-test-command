@@ -1,6 +1,6 @@
 schemaVersion: 2.2.0
 metadata:
-  name: devfile-python-hello-world
+  name: devfile-python-devfile-commands
 
 components:
   - name: python
@@ -13,63 +13,69 @@ components:
       mountSources: true
 
 commands:
-  # Build → Test → App
-  - id: build-test-run
+
+  # Newline → implicit &&
+  - id: generate-validate-transform
     exec:
       component: python
       commandLine: |
-        python -u demo.py build
-        python -u demo.py test
-        python -u demo.py hello Devfile
+        python -u demo.py generate
+        python -u demo.py validate
+        python -u demo.py transform
 
   # Explicit &&
-  - id: build-and-test
+  - id: explicit-and-demo
     exec:
       component: python
       commandLine: |
-        python -u demo.py build && python -u demo.py test
+        python -u demo.py generate && python -u demo.py validate
 
-  # Lint + Test
-  - id: lint-and-test
+  # OR operator
+  - id: or-demo
     exec:
       component: python
       commandLine: |
-        python -u demo.py lint
-        python -u demo.py test
-
-  # Multiline shell ( \ continuation )
-  - id: run-python-multiline
-    exec:
-      component: python
-      commandLine: |
-        python -u \
-          demo.py \
-          multiline
+        python -u demo.py fail || echo "Recovered from failure"
 
   # Semicolon chaining
   - id: semicolon-demo
     exec:
       component: python
       commandLine: |
-        python -u demo.py semicolon;
-        python -u demo.py semicolon;
-        python -u demo.py semicolon
+        python -u demo.py status;
+        python -u demo.py status
 
-  # Pipe example
+  # Pipe demo
   - id: pipe-demo
     exec:
       component: python
       commandLine: |
         python -u demo.py pipe | grep "service=python" | wc -l
 
-  # OR operator (||)
-  - id: or-operator-demo
+  # POSIX multiline using backslash (\)
+  - id: posix-multiline-demo
     exec:
       component: python
       commandLine: |
-        python -u demo.py or_fail || echo "Recovered from failure"
+        python -u \
+          demo.py \
+          argv \
+          one \
+          two \
+          three
 
-  # Windows backslash normalization (\\)
+  # Windows escaped multiline (\\)
+  - id: windows-multiline-demo
+    exec:
+      component: python
+      commandLine: |
+        python -u \\
+          demo.py \\
+          argv \\
+          win \\
+          style
+
+  # Windows backslash normalization function
   - id: windows-backslash-demo
     exec:
       component: python
@@ -78,98 +84,37 @@ commands:
           demo.py \\
           windows_backslash
 
-  # Single line normal run
-  - id: run-app
-    exec:
-      component: python
-      commandLine: |
-        python -u demo.py hello
-
-  # Mixed shell syntax
-  - id: mixed-shell-syntax
-    exec:
-      component: python
-      commandLine: |
-        python -u demo.py pipe | grep "service=python";
-        echo "done"
-
-  # Composite sequential workflow
-  - id: full-workflow
-    composite:
-      commands:
-        - build-test-run
-        - run-python-multiline
-        - run-app
-      parallel: false
-
-  # Composite parallel workflow
-  - id: diagnostics-parallel
-    composite:
-      commands:
-        - pipe-demo
-        - or-operator-demo
-        - semicolon-demo
-      parallel: true
-
   # Subshell grouping
   - id: subshell-demo
     exec:
       component: python
       commandLine: |
-        (python -u demo.py build && python -u demo.py test) && python -u demo.py hello Devfile
+        (python -u demo.py generate && python -u demo.py validate) &&
+        python -u demo.py transform
 
-  # Conditional execution (if / then / else)
-  - id: conditional-demo
-    exec:
-      component: python
-      commandLine: |
-        if python -u demo.py test; then echo "Test succeeded"; else echo "Test failed"; fi
-
-  # Command substitution $(...)
-  - id: command-substitution-demo
-    exec:
-      component: python
-      commandLine: |
-        echo "Python version: $(python --version)"
-
-  # Inline environment variable
-  - id: inline-env-demo
-    exec:
-      component: python
-      commandLine: |
-        MODE=dev python -u demo.py hello
-
-  # Background execution with wait
+  # Background + wait
   - id: background-demo
     exec:
       component: python
       commandLine: |
         python -u demo.py pipe & python -u demo.py pipe & wait
 
-  # Output redirection
-  - id: redirection-demo
-    exec:
-      component: python
-      commandLine: |
-        python -u demo.py pipe > out.txt && cat out.txt
+  # Composite: sequential pipeline
+  - id: full-demo
+    composite:
+      commands:
+        - generate-validate-transform
+        - pipe-demo
+        - or-demo
+        - posix-multiline-demo
+        - windows-multiline-demo
+      parallel: false
 
-  # Append redirection
-  - id: append-redirection-demo
-    exec:
-      component: python
-      commandLine: |
-        python -u demo.py pipe >> out.txt && cat out.txt
-
-  # Here-string (bash specific)
-  - id: here-string-demo
-    exec:
-      component: python
-      commandLine: |
-        grep python <<< "python devfile demo example"
-
-  # Mixed advanced syntax
-  - id: mixed-advanced-syntax
-    exec:
-      component: python
-      commandLine: |
-        (MODE=test python -u demo.py pipe | grep python > result.txt) && echo "Saved to result.txt"
+  # Composite: parallel diagnostics
+  - id: diagnostics-parallel
+    composite:
+      commands:
+        - pipe-demo
+        - semicolon-demo
+        - windows-backslash-demo
+      parallel: true

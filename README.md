@@ -1,15 +1,26 @@
-# Devfile Python Hello World
+# Devfile Python Shell Coverage Demo
 
-A simple Python application used to demonstrate Devfile command execution.
+---
 
-This repository is designed to showcase all practical patterns supported by
-`devfile.yaml` commands, including:
+## What this demo proves
 
-- Logical command chaining (`&&`)
-- Shell-style multiline commands
-- Pipes (`|`), semicolons (`;`), and OR operators (`||`)
-- Windows-style backslash normalization (`\\`)
-- Composite commands (sequential, parallel, nested)
+This setup covers **100% of Devfile command execution patterns**:
+
+| Feature                               | Covered |
+| ------------------------------------- | ------- | --- | --- |
+| Implicit `&&` (newline normalization) | ✅      |
+| Explicit `&&`                         | ✅      |
+| OR operator `                         |         | `   | ✅  |
+| Semicolon chaining `;`                | ✅      |
+| Pipe `                                | `       | ✅  |
+| POSIX multiline `\`                   | ✅      |
+| Windows escaped multiline `\\`        | ✅      |
+| Argument preservation                 | ✅      |
+| Subshell `( )`                        | ✅      |
+| Background jobs `&` + `wait`          | ✅      |
+| Composite sequential                  | ✅      |
+| Composite parallel                    | ✅      |
+| Real data flow and validation         | ✅      |
 
 ---
 

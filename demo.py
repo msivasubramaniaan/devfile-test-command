@@ -1,102 +1,90 @@
 import sys
-from typing import List
+import json
+from pathlib import Path
+
+DATA = Path("data.json")
 
 
 class Demo:
     """
-    Lightweight demo class that simulates a tiny build pipeline.
-    Everything runs in milliseconds but still behaves like real steps.
+    Minimal but real functionality:
+      - generate    → create real data
+      - validate    → validate data, can fail
+      - transform   → mutate data
+      - status      → show current state
+      - pipe        → structured output for | grep | wc
+      - fail        → controlled failure for ||
+      - windows_backslash → verify \\ normalization
+      - argv        → show how multiline (\ and \\) are joined
     """
 
-    def hello(self, name: str = "Devfile") -> None:
-        greeting = f"Hello {name}"
-        print(greeting)
+    def generate(self):
+        payload = {
+            "service": "python",
+            "version": 1,
+            "status": "ok"
+        }
+        DATA.write_text(json.dumps(payload, indent=2))
+        print("Data generated")
 
-    def build(self) -> None:
-        """
-        Simulate a build by producing a deterministic artifact value.
-        """
-        sources = ["core", "utils", "api"]
-        artifact = "-".join(sources).upper()
-        print(f"Build artifact: {artifact}")
-
-    def test(self) -> None:
-        """
-        Simulate tests by validating a known invariant.
-        """
-        expected = 6
-        actual = sum([1, 2, 3])
-        if actual != expected:
-            print("Tests failed")
+    def validate(self):
+        if not DATA.exists():
+            print("No data to validate")
             sys.exit(1)
-        print("Tests passed")
 
-    def lint(self) -> None:
-        """
-        Simulate linting by checking naming conventions.
-        """
-        names = ["build", "test", "lint", "hello"]
-        invalid = [n for n in names if not n.islower()]
-        if invalid:
-            print(f"Lint failed: {invalid}")
+        data = json.loads(DATA.read_text())
+        if data.get("status") != "ok":
+            print("Validation failed")
             sys.exit(1)
-        print("Lint clean")
 
-    def multiline(self) -> None:
-        """
-        Entry point for testing shell line continuation.
-        """
-        print("Multiline execution OK")
+        print("Validation passed")
 
-    def semicolon(self) -> None:
-        """
-        Small step useful for semicolon chaining.
-        """
-        print("Semicolon step OK")
+    def transform(self):
+        if not DATA.exists():
+            print("No data to transform")
+            sys.exit(1)
 
-    def pipe(self) -> None:
-        """
-        Output structured text so pipes can do real filtering.
-        """
-        records = [
-            "service=python status=ok",
-            "service=node status=ok",
-            "service=python status=warn",
-        ]
-        for r in records:
-            print(r)
+        data = json.loads(DATA.read_text())
+        data["transformed"] = True
+        DATA.write_text(json.dumps(data, indent=2))
+        print("Data transformed")
 
-    def or_fail(self) -> None:
-        """
-        Fail deterministically for || demo.
-        """
-        print("Simulated failure")
+    def status(self):
+        if DATA.exists():
+            print(DATA.read_text())
+        else:
+            print("No data available")
+
+    def pipe(self):
+        print("service=python status=ok")
+        print("service=node status=warn")
+        print("service=python status=error")
+
+    def fail(self):
+        print("Intentional failure")
         sys.exit(1)
 
-    def windows_backslash(self) -> None:
-        """
-        Target for Windows-style \\ normalization demo.
-        """
-        print("Windows backslash normalization OK")
+    def windows_backslash(self):
+        print("Windows-style backslash normalization works")
+
+    def argv(self):
+        print("ARGV:", sys.argv[1:])
 
 
-def main(argv: List[str]) -> None:
+def main():
     demo = Demo()
 
-    if len(argv) < 2:
-        print("Usage: python demo.py <action> [args]")
+    if len(sys.argv) < 2:
+        print("Usage: python demo.py <command>")
         sys.exit(1)
 
-    action = argv[1]
-    args = argv[2:]
-
-    if not hasattr(demo, action):
-        print(f"Unknown action: {action}")
+    cmd = sys.argv[1]
+    if not hasattr(demo, cmd):
+        print(f"Unknown command: {cmd}")
         sys.exit(1)
 
-    method = getattr(demo, action)
-    method(*args)
+    getattr(demo, cmd)()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
