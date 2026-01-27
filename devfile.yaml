@@ -13,12 +13,16 @@ components:
       mountSources: true
 
 commands:
+  # ------------------------------------------------------------------
+  # 1. Core workflow (real functionality)
+  # ------------------------------------------------------------------
 
   # Newline → implicit &&
   - id: generate-validate-transform
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u demo.py generate
         python -u demo.py validate
         python -u demo.py transform
@@ -28,35 +32,56 @@ commands:
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u demo.py generate && python -u demo.py validate
 
-  # OR operator
+  # Status inspection
+  - id: status
+    exec:
+      component: python
+      commandLine: |
+        set -x;
+        python -u demo.py status
+
+  # ------------------------------------------------------------------
+  # 2. OR operator (||)
+  # ------------------------------------------------------------------
   - id: or-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u demo.py fail || echo "Recovered from failure"
 
-  # Semicolon chaining
+  # ------------------------------------------------------------------
+  # 3. Semicolon chaining (;)
+  # ------------------------------------------------------------------
   - id: semicolon-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u demo.py status;
         python -u demo.py status
 
-  # Pipe demo
+  # ------------------------------------------------------------------
+  # 4. Pipe operator (|)
+  # ------------------------------------------------------------------
   - id: pipe-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u demo.py pipe | grep "service=python" | wc -l
 
-  # POSIX multiline using backslash (\)
+  # ------------------------------------------------------------------
+  # 5. POSIX multiline (\) – dlv/docker style
+  # ------------------------------------------------------------------
   - id: posix-multiline-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u \
           demo.py \
           argv \
@@ -64,42 +89,80 @@ commands:
           two \
           three
 
-  # Windows escaped multiline (\\)
+  # ------------------------------------------------------------------
+  # 6. Windows escaped multiline (\\ → \)
+  # ------------------------------------------------------------------
   - id: windows-multiline-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u \\
           demo.py \\
           argv \\
           win \\
           style
 
-  # Windows backslash normalization function
+  # ------------------------------------------------------------------
+  # 7. Windows backslash normalization function
+  # ------------------------------------------------------------------
   - id: windows-backslash-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         python -u \\
           demo.py \\
           windows_backslash
 
-  # Subshell grouping
+  # ------------------------------------------------------------------
+  # 8. Subshell grouping ( )
+  # ------------------------------------------------------------------
   - id: subshell-demo
     exec:
       component: python
       commandLine: |
+        set -x;
         (python -u demo.py generate && python -u demo.py validate) &&
         python -u demo.py transform
 
-  # Background + wait
+  # ------------------------------------------------------------------
+  # 9. Background execution (&) + wait
+  # ------------------------------------------------------------------
   - id: background-demo
     exec:
       component: python
       commandLine: |
-        python -u demo.py pipe & python -u demo.py pipe & wait
+        set -x;
+        python -u demo.py pipe &
+        python -u demo.py pipe &
+        wait
 
-  # Composite: sequential pipeline
+  # ------------------------------------------------------------------
+  # 10. Simple multiline → auto &&
+  # ------------------------------------------------------------------
+  - id: simple-chain
+    exec:
+      component: python
+      commandLine: |
+        set -x;
+        python -u demo.py generate
+        python -u demo.py validate
+        python -u demo.py status
+
+  # ------------------------------------------------------------------
+  # 11. Trailing && cleanup case
+  # ------------------------------------------------------------------
+  - id: trailing-and-demo
+    exec:
+      component: python
+      commandLine: |
+        set -x;
+        echo "hello world" &&
+
+  # ------------------------------------------------------------------
+  # 12. Composite: sequential workflow
+  # ------------------------------------------------------------------
   - id: full-demo
     composite:
       commands:
@@ -110,7 +173,9 @@ commands:
         - windows-multiline-demo
       parallel: false
 
-  # Composite: parallel diagnostics
+  # ------------------------------------------------------------------
+  # 13. Composite: parallel diagnostics
+  # ------------------------------------------------------------------
   - id: diagnostics-parallel
     composite:
       commands:
@@ -118,3 +183,17 @@ commands:
         - semicolon-demo
         - windows-backslash-demo
       parallel: true
+
+  # ------------------------------------------------------------------
+  # 14. Cyclic composite (must be rejected)
+  # ------------------------------------------------------------------
+
+  - id: cycle-a
+    composite:
+      commands:
+        - cycle-b
+
+  - id: cycle-b
+    composite:
+      commands:
+        - cycle-a
