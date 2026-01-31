@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from pathlib import Path
@@ -70,24 +71,34 @@ class Demo:
     def argv(self):
         print("ARGV:", sys.argv[1:])
     
-    def component_context(self):
-
+    def component_signal(self):
+    
         if not self.component:
-            print("ERROR: component_context requires --component <name>")
+            print("ERROR: component_signal requires --component <name>")
             sys.exit(1)
 
-        result = {
+        import time
+
+        start_ts = time.time()
+        print(f"[component_signal][START] component={self.component}")
+
+        # Small delay to expose parallel behavior without flakiness
+        time.sleep(1)
+
+        payload = {
             "component": self.component,
+            "start": start_ts,
+            "end": time.time(),
             "pid": os.getpid(),
             "cwd": os.getcwd(),
-            "argv": sys.argv[1:],
         }
 
-        output = Path(f"component-context.{self.component}.json")
-        output.write_text(json.dumps(result, indent=2))
+        out = Path(f"component-signal.{self.component}.json")
+        out.write_text(json.dumps(payload, indent=2))
 
-        print(f"[component_context] executed in component '{self.component}'")
-        print(f"[component_context] output written to {output.name}")
+        print(f"[component_signal][END] component={self.component}")
+        print(f"[component_signal] wrote {out.name}")
+
 
 
 

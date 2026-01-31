@@ -300,15 +300,28 @@ commands:
       parallel: true
 
   # ------------------------------------------------------------------
-  # 18. Component context demo
+  # 18. Component signaling demo
   # ------------------------------------------------------------------
-  - id: backend-context
+  - id: signal-backend
     exec:
       component: backend
-      commandLine: python demo.py component_context --component backend
+      commandLine: python demo.py component_signal --component backend
 
-  - id: frontend-context
+  - id: signal-frontend
     exec:
       component: frontend
-      commandLine: python demo.py component_context --component frontend
-
+      commandLine: python demo.py component_signal --component frontend
+  
+  - id: component-seq-demo 
+    composite:
+      commands:
+        - signal-backend
+        - signal-frontend
+      parallel: false
+  
+  - id: component-parallel-demo
+    composite:
+      commands:
+        - signal-backend
+        - signal-frontend
+      parallel: true
