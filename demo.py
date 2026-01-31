@@ -69,6 +69,26 @@ class Demo:
 
     def argv(self):
         print("ARGV:", sys.argv[1:])
+    
+    def component_context(self):
+
+        if not self.component:
+            print("ERROR: component_context requires --component <name>")
+            sys.exit(1)
+
+        result = {
+            "component": self.component,
+            "pid": os.getpid(),
+            "cwd": os.getcwd(),
+            "argv": sys.argv[1:],
+        }
+
+        output = Path(f"component-context.{self.component}.json")
+        output.write_text(json.dumps(result, indent=2))
+
+        print(f"[component_context] executed in component '{self.component}'")
+        print(f"[component_context] output written to {output.name}")
+
 
 
 def main():

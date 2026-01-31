@@ -298,3 +298,17 @@ commands:
         - debug-demo
         - apply-k8s-resource
       parallel: true
+
+  # ------------------------------------------------------------------
+  # 18. Component context demo
+  # ------------------------------------------------------------------
+  - id: backend-context
+    exec:
+      component: backend
+      commandLine: python demo.py component_context --component backend
+
+  - id: frontend-context
+    exec:
+      component: frontend
+      commandLine: python demo.py component_context --component frontend
+
