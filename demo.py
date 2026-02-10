@@ -72,34 +72,45 @@ class Demo:
         print("ARGV:", sys.argv[1:])
     
     def component_signal(self):
-    
+
+        # Validate input
         if not self.component:
-            print("ERROR: component_signal requires --component <name>")
+            print("ERROR: component_signal requires --component <name>", flush=True)
             sys.exit(1)
 
-        import time
-
         start_ts = time.time()
-        print(f"[component_signal][START] component={self.component}")
 
-        # Small delay to expose parallel behavior without flakiness
+        print("=" * 50, flush=True)
+        print(f"[component_signal][START]", flush=True)
+        print(f"component : {self.component}", flush=True)
+        print(f"time      : {time.strftime('%H:%M:%S')}", flush=True)
+        print(f"pid       : {os.getpid()}", flush=True)
+        print(f"cwd       : {os.getcwd()}", flush=True)
+
+        # Small delay to expose sequential vs parallel behavior
         time.sleep(1)
 
         payload = {
             "component": self.component,
             "start": start_ts,
             "end": time.time(),
+            "duration_sec": round(time.time() - start_ts, 3),
             "pid": os.getpid(),
             "cwd": os.getcwd(),
         }
 
         out = Path(f"component-signal.{self.component}.json")
-        out.write_text(json.dumps(payload, indent=2))
 
-        print(f"[component_signal][END] component={self.component}")
-        print(f"[component_signal] wrote {out.name}")
+        try:
+            out.write_text(json.dumps(payload, indent=2))
+            print(f"[component_signal] wrote file: {out.name}", flush=True)
 
+        except Exception as e:
+            print(f"[component_signal][ERROR] Failed writing file: {e}", flush=True)
+            sys.exit(2)
 
+        print(f"[component_signal][END] component={self.component}", flush=True)
+        print("=" * 50, flush=True)
 
 
 def main():

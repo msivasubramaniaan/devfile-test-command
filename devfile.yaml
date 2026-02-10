@@ -305,12 +305,12 @@ commands:
   - id: signal-backend
     exec:
       component: backend
-      commandLine: python demo.py component_signal --component backend
+      commandLine: python -u demo.py component_signal --component backend
 
   - id: signal-frontend
     exec:
       component: frontend
-      commandLine: python demo.py component_signal --component frontend
+      commandLine: python -u demo.py component_signal --component frontend
   
   - id: component-seq-demo 
     composite:
